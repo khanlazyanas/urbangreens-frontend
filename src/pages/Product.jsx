@@ -2,7 +2,8 @@ import React, { useState, useContext, useEffect } from "react";
 import { useNavigate, useLocation } from "react-router-dom";
 import productList from "../data/ProductList";
 import { FaRupeeSign, FaCartPlus } from "react-icons/fa";
-import { FaSliders } from "react-icons/fa6";
+import { FaSearch } from "react-icons/fa";  // ✅ yaha fa se import karo
+import { FaSliders } from "react-icons/fa6"; // ✅ ye fa6 se hi aata hai
 import { CartContext } from "../context/CartContext";
 import axios from "axios";
 import { toast } from "react-toastify";
@@ -21,6 +22,7 @@ export default function Products() {
   const [organic, setOrganic] = useState("All");
   const [priceRange, setPriceRange] = useState("all");
   const [sortBy, setSortBy] = useState("");
+  const [search, setSearch] = useState(""); // ✅ search state
 
   const { addToCart } = useContext(CartContext);
   const [loadingProduct, setLoadingProduct] = useState(null);
@@ -34,6 +36,7 @@ export default function Products() {
     }
   }, [categoryFromHome]);
 
+  // ✅ Filtering logic with search
   const filtered = productList
     .filter((p) => category === "All" || p.category === category)
     .filter((p) => brand === "All" || p.brand === brand)
@@ -49,6 +52,9 @@ export default function Products() {
       if (priceRange === "2000+") return p.price > 2000;
       return true;
     })
+    .filter((p) =>
+      search.trim() === "" ? true : p.name.toLowerCase().includes(search.toLowerCase())
+    ) // ✅ search filter
     .sort((a, b) => {
       if (sortBy === "price-asc") return a.price - b.price;
       if (sortBy === "price-desc") return b.price - a.price;
@@ -56,63 +62,61 @@ export default function Products() {
     });
 
   const handleAddToCart = async (item) => {
-  try {
-    setLoadingProduct(item.name);
+    try {
+      setLoadingProduct(item.name);
 
-    const productId = item._id || item.id;
-    if (!productId) {
-      setLoadingProduct(null);
-      toast.error("Product ID missing.");
-      return;
-    }
-
-    const token = localStorage.getItem("token");
-    // console.log("Token from localStorage:", token);
-
-    if (!token) {
-      toast.error("Please login first.");
-      navigate("/login");
-      return;
-    }
-
-    const res = await axios.post(
-      `${BACKEND_URL}/api/cart`,   // ⚠️ yahan tum extra `/` laga rahe the
-      {
-        productId,
-        name: item.name,
-        price: item.price,
-        quantity: 1,
-        image: item.image,
-      },
-      {
-        headers: {
-          Authorization: `Bearer ${token}`, // ✅ correct format
-        },
+      const productId = item._id || item.id;
+      if (!productId) {
+        setLoadingProduct(null);
+        toast.error("Product ID missing.");
+        return;
       }
-    );
 
-    if (res.data.success) {
-      addToCart(item);
-      toast.success("Item added to cart!");
-    }
+      const token = localStorage.getItem("token");
 
-    setTimeout(() => {
+      if (!token) {
+        toast.error("Please login first.");
+        navigate("/login");
+        return;
+      }
+
+      const res = await axios.post(
+        `${BACKEND_URL}/api/cart`,
+        {
+          productId,
+          name: item.name,
+          price: item.price,
+          quantity: 1,
+          image: item.image,
+        },
+        {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        }
+      );
+
+      if (res.data.success) {
+        addToCart(item);
+        toast.success("Item added to cart!");
+      }
+
+      setTimeout(() => {
+        setLoadingProduct(null);
+        navigate("/cart");
+      }, 400);
+    } catch (err) {
+      console.error("Add to cart API error:", err.response?.data || err.message);
       setLoadingProduct(null);
-      navigate("/cart");
-    }, 400);
-  } catch (err) {
-    console.error("Add to cart API error:", err.response?.data || err.message);
-    setLoadingProduct(null);
 
-    if (err.response?.status === 401) {
-      toast.error("Login first to add items to cart.");
-      navigate("/login");
-    } else {
-      toast.error("Failed to add item to cart. Please try again.");
+      if (err.response?.status === 401) {
+        toast.error("Login first to add items to cart.");
+        navigate("/login");
+      } else {
+        toast.error("Failed to add item to cart. Please try again.");
+      }
     }
-  }
-};
-
+  };
 
   return (
     <div className="pb-12">
@@ -145,91 +149,111 @@ export default function Products() {
         </div>
       </div>
 
-      {/* Filters + Sort */}
-      <div className="flex items-center justify-between px-4 sm:px-8 md:px-12 mb-6 gap-4 relative">
-        <button
-          className="flex items-center gap-2 text-black font-medium border px-3 py-2 rounded hover:bg-gray-100 transition"
-          onClick={() => setShowFilter(!showFilter)}
-        >
-          <FaSliders size={16} /> Filters
-        </button>
+      {/* Search + Filters + Sort */}
+      <div className="flex flex-col sm:flex-row items-center justify-between px-4 sm:px-8 md:px-12 mb-6 gap-4 relative">
+        {/* ✅ Search box */}
+        <div className="flex items-center w-full sm:w-1/2 md:w-1/3 border rounded-lg px-3 py-2 bg-white shadow-sm">
+          <FaSearch className="text-gray-500 mr-2" />
+          <input
+            type="text"
+            placeholder="Search products..."
+            value={search}
+            onChange={(e) => setSearch(e.target.value)}
+            className="w-full outline-none text-sm"
+          />
+        </div>
 
-        {showFilter && (
-          <div className="absolute top-12 left-4 bg-white border rounded shadow-md p-4 z-10 w-60">
-            {/* Filter dropdowns */}
-          </div>
-        )}
+        <div className="flex items-center gap-3">
+          <button
+            className="flex items-center gap-2 text-black font-medium border px-3 py-2 rounded hover:bg-gray-100 transition"
+            onClick={() => setShowFilter(!showFilter)}
+          >
+            <FaSliders size={16} /> Filters
+          </button>
 
-        <select
-          value={sortBy}
-          onChange={(e) => setSortBy(e.target.value)}
-          className="border px-3 py-2 rounded bg-white text-black focus:outline-none"
-        >
-          <option value="">Sort By</option>
-          <option value="price-asc">Price: Low → High</option>
-          <option value="price-desc">Price: High → Low</option>
-        </select>
+          {showFilter && (
+            <div className="absolute top-14 left-4 bg-white border rounded shadow-md p-4 z-10 w-60">
+              {/* TODO: Filter dropdowns */}
+            </div>
+          )}
+
+          <select
+            value={sortBy}
+            onChange={(e) => setSortBy(e.target.value)}
+            className="border px-3 py-2 rounded bg-white text-black focus:outline-none"
+          >
+            <option value="">Sort By</option>
+            <option value="price-asc">Price: Low → High</option>
+            <option value="price-desc">Price: High → Low</option>
+          </select>
+        </div>
       </div>
 
       {/* Products Grid */}
       <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-4 sm:gap-6 px-2 sm:px-6 md:px-12">
-        {filtered.map((item, i) => {
-          const discount = item.oldPrice
-            ? Math.round(((item.oldPrice - item.price) / item.oldPrice) * 100)
-            : 0;
+        {filtered.length === 0 ? (
+          <p className="col-span-full text-center text-gray-500">
+            No products found.
+          </p>
+        ) : (
+          filtered.map((item, i) => {
+            const discount = item.oldPrice
+              ? Math.round(((item.oldPrice - item.price) / item.oldPrice) * 100)
+              : 0;
 
-          return (
-            <div
-              key={i}
-              className="bg-white rounded-lg border hover:shadow-lg transition p-3 sm:p-4 flex flex-col relative"
-            >
-              {discount > 0 && (
-                <span className="absolute top-2 left-2 bg-red-600 text-white text-xs sm:text-sm px-2 py-1 rounded-full font-semibold">
-                  {discount}% OFF
-                </span>
-              )}
-              <img
-                src={item.image}
-                alt={item.name}
-                className="h-32 sm:h-40 md:h-48 object-contain mx-auto mb-3"
-              />
-              <h3
-                className="text-xs sm:text-sm md:text-base mb-1 truncate"
-                style={{ fontFamily: "Playfair Display, serif" }}
+            return (
+              <div
+                key={i}
+                className="bg-white rounded-lg border hover:shadow-lg transition p-3 sm:p-4 flex flex-col relative"
               >
-                {item.name}
-              </h3>
-              <div className="mb-3">
-                <p
-                  className="text-sm sm:text-base md:text-lg font-semibold text-gray-900"
+                {discount > 0 && (
+                  <span className="absolute top-2 left-2 bg-red-600 text-white text-xs sm:text-sm px-2 py-1 rounded-full font-semibold">
+                    {discount}% OFF
+                  </span>
+                )}
+                <img
+                  src={item.image}
+                  alt={item.name}
+                  className="h-32 sm:h-40 md:h-48 object-contain mx-auto mb-3"
+                />
+                <h3
+                  className="text-xs sm:text-sm md:text-base mb-1 truncate"
+                  style={{ fontFamily: "Playfair Display, serif" }}
+                >
+                  {item.name}
+                </h3>
+                <div className="mb-3">
+                  <p
+                    className="text-sm sm:text-base md:text-lg font-semibold text-gray-900"
+                    style={{ fontFamily: "Poppins, sans-serif" }}
+                  >
+                    <FaRupeeSign className="inline mr-1" />
+                    {item.price}
+                  </p>
+                  {item.oldPrice && (
+                    <p className="text-xs sm:text-sm text-gray-400 line-through">
+                      ₹{item.oldPrice}
+                    </p>
+                  )}
+                </div>
+                <button
+                  onClick={() => handleAddToCart(item)}
+                  disabled={loadingProduct === item.name}
+                  className="mt-auto bg-black text-white py-2 sm:py-2.5 text-xs sm:text-sm md:text-base rounded flex items-center justify-center gap-2 hover:bg-gray-900 transition relative"
                   style={{ fontFamily: "Poppins, sans-serif" }}
                 >
-                  <FaRupeeSign className="inline mr-1" />
-                  {item.price}
-                </p>
-                {item.oldPrice && (
-                  <p className="text-xs sm:text-sm text-gray-400 line-through">
-                    ₹{item.oldPrice}
-                  </p>
-                )}
+                  {loadingProduct === item.name ? (
+                    <span className="h-5 w-5 border-2 border-white border-t-transparent rounded-full animate-spin"></span>
+                  ) : (
+                    <>
+                      <FaCartPlus size={14} /> Add To Cart
+                    </>
+                  )}
+                </button>
               </div>
-              <button
-                onClick={() => handleAddToCart(item)}
-                disabled={loadingProduct === item.name}
-                className="mt-auto bg-black text-white py-2 sm:py-2.5 text-xs sm:text-sm md:text-base rounded flex items-center justify-center gap-2 hover:bg-gray-900 transition relative"
-                style={{ fontFamily: "Poppins, sans-serif" }}
-              >
-                {loadingProduct === item.name ? (
-                  <span className="h-5 w-5 border-2 border-white border-t-transparent rounded-full animate-spin"></span>
-                ) : (
-                  <>
-                    <FaCartPlus size={14} /> Add To Cart
-                  </>
-                )}
-              </button>
-            </div>
-          );
-        })}
+            );
+          })
+        )}
       </div>
     </div>
   );
