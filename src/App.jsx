@@ -17,7 +17,7 @@ import { AuthProvider } from "./context/Authcontext"; // ✅ Import AuthProvider
 import ThankYou from "./pages/Thankyou";
 import TermsAndConditions from "./pages/TermsAndConditions";
 import PrivacyPolicy from "./pages/PrivacyPolicy";
-import MyOrder from "./pages/MyOrder"; // ✅ Import MyOrder page
+import MyOrder from "./pages/Myorder"; // ✅ Import MyOrder page
 
 const App = () => {
   return (
