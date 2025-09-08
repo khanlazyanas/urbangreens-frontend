@@ -4,7 +4,7 @@ import { FaCheckCircle } from "react-icons/fa";
 import { motion } from "framer-motion";
 import Confetti from "react-confetti";
 import { useWindowSize } from "react-use";
-import MyOrder from "./MyOrder"; // 👈 import MyOrder
+import MyOrder from "./Myorder"; // 👈 import MyOrder
 
 export default function ThankYou() {
   const { width, height } = useWindowSize();
