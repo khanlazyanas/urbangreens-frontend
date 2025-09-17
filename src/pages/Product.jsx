@@ -103,7 +103,7 @@ export default function Products() {
 
       setTimeout(() => {
         setLoadingProduct(null);
-        navigate("/cart");
+        // navigate("/cart");
       }, 400);
     } catch (err) {
       console.error("Add to cart API error:", err.response?.data || err.message);

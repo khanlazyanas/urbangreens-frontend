@@ -10,18 +10,24 @@ export default function Signup() {
   const [name, setName] = useState("");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
+  const [role, setRole] = useState(""); // ✅ optional role
   const [showPassword, setShowPassword] = useState(false); // 👁️ toggle state
 
   const handleSignup = async () => {
     if (!name || !email || !password) {
-      toast.error("⚠️ Please fill all fields!", { toastId: "signup-empty" });
+      toast.error("⚠️ Please fill all required fields!", { toastId: "signup-empty" });
       return;
     }
     try {
+      // ✅ Agar role empty hai to body me role nahi bhejenge
+      const bodyData = role
+        ? { name, email, password, role }
+        : { name, email, password };
+
       const res = await fetch(`${BACKEND_URL}/api/register`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ name, email, password }),
+        body: JSON.stringify(bodyData),
       });
 
       const data = await res.json();
@@ -56,6 +62,7 @@ export default function Signup() {
           Create Your Account
         </h2>
 
+        {/* Name */}
         <motion.input
           whileFocus={{ scale: 1.02 }}
           type="text"
@@ -65,6 +72,8 @@ export default function Signup() {
           value={name}
           onChange={(e) => setName(e.target.value)}
         />
+
+        {/* Email */}
         <motion.input
           whileFocus={{ scale: 1.02 }}
           type="email"
@@ -74,6 +83,18 @@ export default function Signup() {
           value={email}
           onChange={(e) => setEmail(e.target.value)}
         />
+
+        {/* ✅ Optional Role dropdown */}
+        <select
+          className="w-full mb-5 px-5 py-3 rounded-xl border border-gray-300 bg-white/70
+                     focus:outline-none focus:ring-2 focus:ring-green-500 placeholder-gray-500 transition"
+          value={role}
+          onChange={(e) => setRole(e.target.value)}
+        >
+          <option value="">Select Role (optional)</option>
+          <option value="user">User</option>
+          <option value="admin">Admin</option>
+        </select>
 
         {/* 👁️ Password with Eye Toggle */}
         <div className="relative w-full mb-6">
