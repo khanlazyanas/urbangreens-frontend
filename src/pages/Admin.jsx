@@ -1,5 +1,13 @@
 import React, { useEffect, useState } from "react";
-import { Home, BarChart, Package, Users, Bell, Search, Settings } from "lucide-react";
+import {
+  Home,
+  BarChart,
+  Package,
+  Users,
+  Bell,
+  Search,
+  Settings,
+} from "lucide-react";
 import { Link } from "react-router-dom";
 import axios from "axios";
 import { BACKEND_URL } from "../main.jsx";
@@ -18,12 +26,26 @@ export default function AdminPage() {
         const token = localStorage.getItem("token");
         const headers = { Authorization: `Bearer ${token}` };
 
-        const usersRes = await axios.get(`${BACKEND_URL}/api/admin/users`, { headers });
-        setUsersCount(Array.isArray(usersRes.data.users) ? usersRes.data.users.length : 0);
+        const usersRes = await axios.get(`${BACKEND_URL}/api/admin/users`, {
+          headers,
+        });
+        setUsersCount(
+          Array.isArray(usersRes.data.users) ? usersRes.data.users.length : 0
+        );
 
-        const ordersRes = await axios.get(`${BACKEND_URL}/api/admin/orders`, { headers });
-        setOrdersCount(Array.isArray(ordersRes.data.orders) ? ordersRes.data.orders.length : 0);
-        setRecentOrders(Array.isArray(ordersRes.data.orders) ? ordersRes.data.orders.slice(0, 5) : []);
+        const ordersRes = await axios.get(`${BACKEND_URL}/api/admin/orders`, {
+          headers,
+        });
+        setOrdersCount(
+          Array.isArray(ordersRes.data.orders)
+            ? ordersRes.data.orders.length
+            : 0
+        );
+        setRecentOrders(
+          Array.isArray(ordersRes.data.orders)
+            ? ordersRes.data.orders.slice(0, 5)
+            : []
+        );
       } catch (err) {
         console.error("Admin data fetch error:", err);
         toast.error(
@@ -40,6 +62,7 @@ export default function AdminPage() {
   return (
     <div className="min-h-screen bg-gradient-to-br from-green-50 via-white to-green-100 flex">
       <ToastContainer />
+
       {/* Sidebar */}
       <motion.aside
         initial={{ x: -60, opacity: 0 }}
@@ -51,11 +74,31 @@ export default function AdminPage() {
           AdminPanel
         </h1>
         <nav className="flex flex-col gap-3">
-          <SidebarItem icon={<Home size={20} />} label="Dashboard" to="/admin/dashboard" />
-          <SidebarItem icon={<Package size={20} />} label="Products" to="/admin/products" />
-          <SidebarItem icon={<Users size={20} />} label="Users" to="/admin/users" />
-          <SidebarItem icon={<BarChart size={20} />} label="Reports" to="/admin/reports" />
-          <SidebarItem icon={<Settings size={20} />} label="Settings" to="/admin/settings" />
+          <SidebarItem
+            icon={<Home size={20} />}
+            label="Dashboard"
+            to="/admin/dashboard"
+          />
+          <SidebarItem
+            icon={<Package size={20} />}
+            label="Products"
+            to="/admin/products"
+          />
+          <SidebarItem
+            icon={<Users size={20} />}
+            label="Users"
+            to="/admin/users"
+          />
+          <SidebarItem
+            icon={<BarChart size={20} />}
+            label="Reports"
+            to="/admin/reports"
+          />
+          <SidebarItem
+            icon={<Settings size={20} />}
+            label="Settings"
+            to="/admin/settings"
+          />
         </nav>
       </motion.aside>
 
@@ -102,7 +145,10 @@ export default function AdminPage() {
           transition={{ duration: 0.8 }}
           className="bg-white/60 backdrop-blur-xl p-6 rounded-3xl shadow-xl"
         >
-          <h3 className="text-xl font-semibold mb-4 text-gray-800">Recent Orders</h3>
+          <h3 className="text-xl font-semibold mb-4 text-gray-800">
+            Recent Orders
+          </h3>
+
           {recentOrders.length > 0 ? (
             <div className="overflow-x-auto">
               <table className="w-full text-sm border-collapse">
@@ -111,14 +157,39 @@ export default function AdminPage() {
                     <th className="py-2 px-4 text-left font-medium">User</th>
                     <th className="py-2 px-4 text-left font-medium">Status</th>
                     <th className="py-2 px-4 text-left font-medium">Items</th>
+                    <th className="py-2 px-4 text-left font-medium">Address</th>
+                    <th className="py-2 px-4 text-left font-medium">Phone</th>
                   </tr>
                 </thead>
                 <tbody>
                   {recentOrders.map((order) => (
-                    <tr key={order._id} className="border-b hover:bg-green-50 transition">
+                    <tr
+                      key={order._id}
+                      className="border-b hover:bg-green-50 transition"
+                    >
                       <td className="py-2 px-4">{order.user?.name}</td>
-                      <td className="py-2 px-4 font-semibold text-green-600">{order.status}</td>
-                      <td className="py-2 px-4">{order.items?.length}</td>
+                      <td className="py-2 px-4 font-semibold text-green-600">
+                        {order.status}
+                      </td>
+                      <td className="py-2 px-4">
+                        {order.items?.map((item, idx) => (
+                          <div
+                            key={idx}
+                            className="flex items-center gap-2 mb-1"
+                          >
+                            <img
+                              src={item.image}
+                              alt={item.name}
+                              className="w-8 h-8 rounded"
+                            />
+                            <span>
+                              {item.name} ×{item.quantity}
+                            </span>
+                          </div>
+                        ))}
+                      </td>
+                      <td className="py-2 px-4">{order.address}</td>
+                      <td className="py-2 px-4">{order.phoneNumber}</td>
                     </tr>
                   ))}
                 </tbody>
