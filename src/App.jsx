@@ -26,10 +26,14 @@ const App = () => {
       <CartProvider>
         <Router>
           <div className="flex flex-col min-h-screen">
+            {/* 🔥 Fixed Navbar */}
             <Navbar />
-            
-            {/* ✅ fixed padding-top so heading never hides under navbar */}
-            <main className="flex-grow bg-transparent pt-[72px]">
+
+            {/* 🔥 MAIN CONTENT
+                - Responsive padding for fixed navbar
+                - No extra gap
+                - No content hiding */}
+            <main className="flex-grow bg-transparent pt-[64px] md:pt-[72px]">
               <Routes>
                 <Route path="/" element={<Home />} />
                 <Route path="/products" element={<Products />} />
@@ -46,25 +50,25 @@ const App = () => {
               </Routes>
             </main>
 
+            {/* 🔥 Footer */}
             <Footer />
           </div>
         </Router>
 
-        {/* ✅ Toastify container */}
+        {/* 🔔 Toast Notifications */}
         <ToastContainer
           position="top-center"
           autoClose={2500}
           hideProgressBar={false}
           newestOnTop={false}
           closeOnClick
-          rtl={false}
           pauseOnFocusLoss
           draggable
           pauseOnHover
           limit={3}
           toastClassName={({ type }) =>
             `relative flex items-center p-4 mb-3 rounded-lg shadow-lg font-medium backdrop-blur-md border 
-             transition-all duration-300 ease-in-out animate-slide-up max-w-sm w-full mx-auto break-words overflow-hidden
+             transition-all duration-300 ease-in-out max-w-sm w-full mx-auto break-words
              ${
                type === "success"
                  ? "bg-white/10 border-green-400 text-green-200"
