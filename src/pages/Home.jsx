@@ -193,7 +193,7 @@ export default function Home() {
         </button>
       </div>
 
-      {/* ✅ Testimonials Section */}
+      {/* ✅ Testimonials Section
       <div className="relative z-10 py-14 px-6 md:px-20 bg-white text-green-900">
         <h2 className="text-3xl font-bold text-center mb-10">What Our Customers Say</h2>
         <div className="grid md:grid-cols-3 gap-8">
@@ -229,7 +229,7 @@ export default function Home() {
             </motion.div>
           ))}
         </div>
-      </div>
+      </div> */}
 
       {/* ✅ Newsletter Section */}
       <div className="relative z-10 py-16 px-6 md:px-20 bg-gradient-to-r from-green-900 via-emerald-800 to-green-700 text-center text-white">
