@@ -91,8 +91,7 @@ const Footer = () => {
   </h3>
   <div className="flex items-center gap-4 text-2xl flex-nowrap">
     {[
-      { icon: <FaInstagram />, link: "https://instagram.com/khan_anas842" },
-      { icon: <FaYoutube />, link: "https://youtube.com/@khananas2318" },
+      
       { icon: <FaWhatsapp />, link: "https://wa.me/8429755694" },
       { icon: <FaLinkedin />, link: "https://www.linkedin.com/in/anas-khan-a26b66364" },
       { icon: <FaGithub />, link: "https://github.com/dashboard" },
